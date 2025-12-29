@@ -1,4 +1,5 @@
 # Copyright 2025 Michael Homer. See LICENSE for details.
+from datetime import datetime
 import itertools
 from dataclasses import dataclass, field
 from collections.abc import Callable
