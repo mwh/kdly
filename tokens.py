@@ -26,9 +26,9 @@ class NumberToken(ValueToken):
     @staticmethod
     def from_match(match: re.Match, line, column):
         if not match.group('fractional') and not match.group('exponentvalue'):
-            return NumberToken(line, column, int(match.group(0)))
+            return NumberToken(line, column, int(match.group(0).replace('_', '')))
         else:
-            return NumberToken(line, column, float(match.group(0)))
+            return NumberToken(line, column, float(match.group(0).replace('_', '')))
 
 
 @dataclass

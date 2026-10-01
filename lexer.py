@@ -130,10 +130,10 @@ def tokenise(source: str) -> list[Token]:
     """
     line = 1
     column = 0
-    decimal_pattern = re.compile(r'(?P<sign>[-+])?(?P<whole>[0-9_]+)(\.(?P<fractional>[0-9_]+))?([eE](?P<exponentsign>[-+])?(?P<exponentvalue>[0-9_]+))?')
-    hex_pattern = re.compile(r'0x(?P<full>(?P<sign>[-+])?(?P<whole>(_*[A-Fa-f0-9])+))_*')
-    octal_pattern = re.compile(r'0o(?P<full>(?P<sign>[-+])?(?P<whole>(_*[0-7])+))_*')
-    binary_pattern = re.compile(r'0b(?P<full>(?P<sign>[-+])?(?P<whole>(_*[01])+))_*')
+    decimal_pattern = re.compile(r'(?P<sign>[-+])?(?P<whole>[0-9][0-9_]*)(\.(?P<fractional>[0-9_]+))?([eE](?P<exponentsign>[-+])?(?P<exponentvalue>[0-9][0-9_]*))?')
+    hex_pattern = re.compile(r'0x(?P<full>(?P<sign>[-+])?(?P<whole>([A-Fa-f0-9]_*)+))')
+    octal_pattern = re.compile(r'0o(?P<full>(?P<sign>[-+])?(?P<whole>([0-7]_*)+))')
+    binary_pattern = re.compile(r'0b(?P<full>(?P<sign>[-+])?(?P<whole>([01]_*)+))_*')
     raw_multiline_string_pattern = re.compile(r'(#+)"""')
     raw_string_pattern = re.compile(r'(#+)"')
     single_line_comment_pattern = re.compile(r'//[^\n]*')
