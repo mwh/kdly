@@ -34,9 +34,9 @@ def valid_bare_identifier(value: str) -> bool:
         return False
     if value[0].isdigit():
         return False
-    # Leading sign followed by a digit is not allowed
+    # Leading sign or dot followed by a digit is not allowed
     if len(value) > 1:
-        if value[0] in '-+':
+        if value[0] in '-+.':
             if value[1].isdigit():
                 return False
     # Reserved keyword-like identifiers
