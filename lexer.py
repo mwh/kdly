@@ -130,7 +130,7 @@ def tokenise(source: str) -> list[Token]:
     """
     line = 1
     column = 0
-    decimal_pattern = re.compile(r'(?P<sign>[-+])?(?P<whole>[0-9][0-9_]*)(\.(?P<fractional>[0-9_]+))?([eE](?P<exponentsign>[-+])?(?P<exponentvalue>[0-9][0-9_]*))?')
+    decimal_pattern = re.compile(r'(?P<sign>[-+])?(?P<whole>[0-9][0-9_]*)(\.(?P<fractional>[0-9][0-9_]*))?([eE](?P<exponentsign>[-+])?(?P<exponentvalue>[0-9][0-9_]*))?')
     hex_pattern = re.compile(r'(?P<sign>[-+])?0x(?P<full>(?P<whole>([A-Fa-f0-9]_*)+))')
     octal_pattern = re.compile(r'(?P<sign>[-+])?0o(?P<full>(?P<whole>([0-7]_*)+))')
     binary_pattern = re.compile(r'(?P<sign>[-+])?0b(?P<full>(?P<whole>([01]_*)+))_*')
@@ -378,6 +378,11 @@ def tokenise(source: str) -> list[Token]:
                             raise KDLSyntaxError(f"Invalid suffix type annotation on number with exponential part at {line}:{column}")
                         if not valid_bare_identifier(identifier):
                             raise KDLSyntaxError(f"Invalid identifier in suffix type annotation: '{identifier}' at {line}:{column}")
+                        if identifier.startswith('._'):
+                            suf = ''
+                            if experimental_suffix_type_annotations:
+                                suf = ' or suffix type annotation identifier invalid'
+                            raise KDLSyntaxError(f"Number literal begins fractional part with _{suf}: '{identifier}' starts with ._ at {line}:{column}")
                         if identifier[0] == '.' or identifier[0] == ',':
                             raise KDLSyntaxError(f"Invalid identifier in suffix type annotation: '{identifier}' starts with {identifier[0]} at {line}:{column}")
                         if identifier[0] == 'e' or identifier[0] == 'E':
