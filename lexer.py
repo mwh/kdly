@@ -131,9 +131,9 @@ def tokenise(source: str) -> list[Token]:
     line = 1
     column = 0
     decimal_pattern = re.compile(r'(?P<sign>[-+])?(?P<whole>[0-9][0-9_]*)(\.(?P<fractional>[0-9_]+))?([eE](?P<exponentsign>[-+])?(?P<exponentvalue>[0-9][0-9_]*))?')
-    hex_pattern = re.compile(r'0x(?P<full>(?P<sign>[-+])?(?P<whole>([A-Fa-f0-9]_*)+))')
-    octal_pattern = re.compile(r'0o(?P<full>(?P<sign>[-+])?(?P<whole>([0-7]_*)+))')
-    binary_pattern = re.compile(r'0b(?P<full>(?P<sign>[-+])?(?P<whole>([01]_*)+))_*')
+    hex_pattern = re.compile(r'(?P<sign>[-+])?0x(?P<full>(?P<whole>([A-Fa-f0-9]_*)+))')
+    octal_pattern = re.compile(r'(?P<sign>[-+])?0o(?P<full>(?P<whole>([0-7]_*)+))')
+    binary_pattern = re.compile(r'(?P<sign>[-+])?0b(?P<full>(?P<whole>([01]_*)+))_*')
     raw_multiline_string_pattern = re.compile(r'(#+)"""')
     raw_string_pattern = re.compile(r'(#+)"')
     single_line_comment_pattern = re.compile(r'//[^\n]*')
@@ -309,12 +309,14 @@ def tokenise(source: str) -> list[Token]:
                 ready = True
             else:
                 raise KDLSyntaxError(f"Unexpected character '/' at {line}:{column}")
-        elif source.startswith('0x', index):
+        elif source.startswith('0x', index) or source.startswith('-0x', index):
             # hex
             if not (match := hex_pattern.match(source, index)):
                 raise KDLSyntaxError(f"Invalid hexadecimal number at {line}:{column}")
             index = match.end()
             number_str = match.group('full')
+            if match.group('sign') == '-':
+                number_str = '-' + number_str
             tokens.append(NumberToken(line, column, int(number_str, 16)))
             if index < len(source):
                 next_char = source[index]
@@ -323,12 +325,14 @@ def tokenise(source: str) -> list[Token]:
                 elif not next_char.isspace() and next_char not in ';)}':
                     raise KDLSyntaxError(f"Unexpected character '{next_char}' after number at {line}:{column}")
             ready = False
-        elif source.startswith('0o', index):
+        elif source.startswith('0o', index) or source.startswith('-0o', index):
             # octal
             if not (match := octal_pattern.match(source, index)):
                 raise KDLSyntaxError(f"Invalid octal number at {line}:{column}")
             index = match.end()
             number_str = match.group('full')
+            if match.group('sign') == '-':
+                number_str = '-' + number_str
             tokens.append(NumberToken(line, column, int(number_str, 8)))
             if index < len(source):
                 next_char = source[index]
@@ -337,12 +341,14 @@ def tokenise(source: str) -> list[Token]:
                 elif not next_char.isspace() and next_char not in ';)}':
                     raise KDLSyntaxError(f"Unexpected character '{next_char}' after number at {line}:{column}")
             ready = False
-        elif source.startswith('0b', index):
+        elif source.startswith('0b', index) or source.startswith('-0b', index):
             # binary
             if not (match := binary_pattern.match(source, index)):
                 raise KDLSyntaxError(f"Invalid binary number at {line}:{column}")
             index = match.end()
             number_str = match.group('full')
+            if match.group('sign') == '-':
+                number_str = '-' + number_str
             tokens.append(NumberToken(line, column, int(number_str, 2)))
             if index < len(source):
                 next_char = source[index]
