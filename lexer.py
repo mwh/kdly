@@ -39,6 +39,9 @@ def valid_bare_identifier(value: str) -> bool:
         if value[0] in '-+.':
             if value[1].isdigit():
                 return False
+            if value[0] in '-+' and value[1] == '.' and len(value) > 2:
+                if value[2].isdigit():
+                    return False
     # Reserved keyword-like identifiers
     if value == 'nan' or value == 'inf' or value == '-inf' or value == '+inf' or value == 'true' or value == 'false' or value == 'null':
         return False
@@ -383,6 +386,8 @@ def tokenise(source: str) -> list[Token]:
                             if experimental_suffix_type_annotations:
                                 suf = ' or suffix type annotation identifier invalid'
                             raise KDLSyntaxError(f"Number literal begins fractional part with _{suf}: '{identifier}' starts with ._ at {line}:{column}")
+                        if identifier == '.':
+                            raise KDLSyntaxError(f"Invalid decmal number literal {number_str}{identifier}: fractional digits must follow the decimal point at {line}:{column}")
                         if identifier[0] == '.' or identifier[0] == ',':
                             raise KDLSyntaxError(f"Invalid identifier in suffix type annotation: '{identifier}' starts with {identifier[0]} at {line}:{column}")
                         if identifier[0] == 'e' or identifier[0] == 'E':
@@ -412,6 +417,10 @@ def tokenise(source: str) -> list[Token]:
                 raise KDLSyntaxError(f"Invalid identifier string '{identifier}' at {line}:{column}; use '#{identifier}' for keyword values or quote for string.")
             if identifier[0] == '.' and len(identifier) > 1 and identifier[1].isdigit():
                 raise KDLSyntaxError(f"Invalid identifier string '{identifier}' at {line}:{column}; identifiers cannot start with a dot followed by a digit.")
+            if identifier[0] in '-+' and len(identifier) > 1 and identifier[1] == '.' and len(identifier) > 2 and identifier[2].isdigit():
+                raise KDLSyntaxError(f"Invalid identifier string '{identifier}' at {line}:{column}; identifiers cannot start with a sign followed by a dot and a digit.")
+            if not valid_bare_identifier(identifier):
+                raise KDLSyntaxError(f"Invalid identifier string '{identifier}' at {line}:{column}")
             tokens.append(StringToken(line, column, identifier))
             ready = False
         elif source.startswith('"""', index):
